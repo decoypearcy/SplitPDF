@@ -1,6 +1,6 @@
 // SplitPDF core logic. No DOM access here, so it can be tested in Node.
 
-export const VERSION = '1.0.0';
+export const VERSION = '1.1.0';
 
 // breaks: array of page numbers N (1-based). A break at N means "a new document starts after page N".
 export function deriveDocs(totalPages, breaks) {

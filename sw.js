@@ -1,5 +1,5 @@
 // Keeps SplitPDF working offline. When online, always fetches fresh files so updates show up straight away.
-const CACHE = 'splitpdf-v1';
+const CACHE = 'splitpdf-v2';
 const ASSETS = [
   './',
   './index.html',

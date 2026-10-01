@@ -155,12 +155,12 @@ main { flex: 1; min-height: 0; position: relative; }
 }
 .cutslot:hover::before { border-top-color: var(--accent-dim); }
 .cutslot:hover .cuttag { color: var(--accent-dim); }
-.cutslot:hover .cuttag::after { content: "split here"; }
+.cutslot:hover .cuttag::after { content: "new document"; }
 .cutslot.on { height: 22px; }
 .cutslot.on::before { border-top: 2px solid var(--accent); }
 .cutslot.on .cuttag { color: var(--accent); background: var(--bg); }
-.cutslot.on .cuttag::after { content: "split"; }
-.cutslot.on:hover .cuttag::after { content: "remove split"; color: var(--danger-text); }
+.cutslot.on .cuttag::after { content: "new document"; }
+.cutslot.on:hover .cuttag::after { content: "remove"; color: var(--danger-text); }
 .cutslot.on:hover::before { border-top-color: var(--danger-text); }
 .cutslot.on:hover .cuttag { color: var(--danger-text); }
 

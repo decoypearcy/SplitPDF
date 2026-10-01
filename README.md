@@ -7,11 +7,11 @@ Split a big scanned PDF into separate, renamed files. Runs entirely in the brows
 1. Open the app address in **Microsoft Edge**.
 2. Click **Install as app** (top right) or Edge menu > Apps > Install this site as an app. It then lives on the desktop and Start menu and works offline.
 3. Drag the scanned PDF onto the window (from an Outlook email or File Explorer), or press **Open PDF**.
-4. Click through the pages. At the last page of each document press **Split after this page** (or press Enter).
-5. Type a name for each document in the right-hand panel.
+4. Document 1 starts on page 1, so just type its name. Then click through to the first page of the next document and press **Start a new document here** (or press Enter). Type its name straight away, press Enter, and repeat.
+5. Made a mistake? Press the same button again on that page to remove the document start, or use Undo.
 6. Press **Save all**, choose a folder. Done. The original PDF is never changed, and existing files are never overwritten.
 
-Shortcuts: Enter = split after this page, arrow keys = change page, Ctrl+Z = undo.
+Shortcuts: Enter = a new document starts on this page, arrow keys = change page, Ctrl+Z = undo.
 
 ## For the person maintaining it
 

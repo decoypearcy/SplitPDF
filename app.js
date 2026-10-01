@@ -200,6 +200,7 @@ async function openFile(file) {
   updateButtons();
   state.cur = 0; // force goTo to render
   goTo(1);
+  if (!restored) focusNameOfDocStartingAt(1);
   if (restored) toast('Welcome back. Your earlier splits and names for this file were restored.', 'info', 6000);
   if (state.total === 1) toast('This PDF has only one page, so there is nothing to split. You can still rename it.', 'warn', 7000);
 }
@@ -227,7 +228,7 @@ function buildThumbs() {
     if (p < state.total) {
       const c = el('div', 'cutslot');
       c.dataset.p = String(p);
-      c.title = 'Click to start a new document after this page';
+      c.title = 'Click to start a new document on the next page';
       c.append(el('span', 'cuttag'));
       cutEls.push(c);
       frag.append(c);
@@ -304,7 +305,8 @@ function pushHistory(withNames = false) {
   if (state.history.length > 100) state.history.shift();
 }
 
-function toggleBreak(n, { advance = false } = {}) {
+// n = the page a document ENDS on (a new document starts on n + 1).
+function toggleBreak(n, { focusName = false } = {}) {
   if (!state.pdf || n < 1 || n >= state.total) return;
   pushHistory();
   const i = state.breaks.indexOf(n);
@@ -312,7 +314,21 @@ function toggleBreak(n, { advance = false } = {}) {
   if (adding) state.breaks.push(n); else state.breaks.splice(i, 1);
   state.breaks.sort((a, b) => a - b);
   breaksChanged();
-  if (adding && advance) goTo(n + 1);
+  if (adding && focusName) focusNameOfDocStartingAt(n + 1);
+}
+
+// The main action: the page being viewed is the first page of a new document.
+function toggleStartHere() {
+  if (!state.pdf || state.cur <= 1) return;
+  toggleBreak(state.cur - 1, { focusName: true });
+}
+
+function focusNameOfDocStartingAt(page) {
+  const idx = docs().findIndex((d) => d.start === page);
+  const input = idx >= 0 ? docListEl.querySelectorAll('input')[idx] : null;
+  if (!input) return;
+  input.focus();
+  input.scrollIntoView({ block: 'nearest' });
 }
 
 function breaksChanged() {
@@ -375,8 +391,7 @@ function renderDocs() {
     const head = el('div', 'dochead');
     head.append(el('span', 'title', `Document ${i + 1}`));
     const n = d.end - d.start + 1;
-    const rangeText = d.start === d.end ? `Page ${d.start}` : `Pages ${d.start}-${d.end}`;
-    head.append(el('span', 'range', `${rangeText} (${n} ${plural(n, 'page', 'pages')})`));
+    head.append(el('span', 'range', `From page ${d.start} (${n} ${plural(n, 'page', 'pages')})`));
     const row = el('div', 'namerow');
     const input = document.createElement('input');
     input.type = 'text';
@@ -398,9 +413,7 @@ function renderDocs() {
     input.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
       e.preventDefault();
-      const all = [...docListEl.querySelectorAll('input')];
-      const next = all[all.indexOf(input) + 1];
-      if (next) next.focus(); else $('btnSave').focus();
+      input.blur(); // name done: arrow keys and Enter work on the pages again
     });
     row.append(input, el('span', 'ext', '.pdf'));
     card.append(head, row);
@@ -453,18 +466,18 @@ function updateCurrentUI() {
   if (t) t.scrollIntoView({ block: 'nearest' });
   const btn = $('btnSplit');
   const lab = $('btnSplitLabel');
-  if (p >= state.total) {
+  if (p <= 1) {
     btn.disabled = true;
     btn.className = 'btn primary';
-    lab.textContent = 'Last page';
-  } else if (state.breaks.includes(p)) {
+    lab.textContent = 'Document 1 starts here';
+  } else if (state.breaks.includes(p - 1)) {
     btn.disabled = false;
     btn.className = 'btn outline-gold';
-    lab.textContent = 'Remove split after this page';
+    lab.textContent = 'Remove this document start';
   } else {
     btn.disabled = false;
     btn.className = 'btn primary';
-    lab.textContent = 'Split after this page';
+    lab.textContent = 'Start a new document here';
   }
   updateActiveDoc();
 }
@@ -756,7 +769,7 @@ fileInput.addEventListener('change', () => {
 
 $('btnPrev').addEventListener('click', (e) => { goTo(state.cur - 1); e.currentTarget.blur(); });
 $('btnNext').addEventListener('click', (e) => { goTo(state.cur + 1); e.currentTarget.blur(); });
-$('btnSplit').addEventListener('click', (e) => { toggleBreak(state.cur, { advance: true }); e.currentTarget.blur(); });
+$('btnSplit').addEventListener('click', (e) => { toggleStartHere(); e.currentTarget.blur(); });
 $('zoomPage').addEventListener('click', (e) => { setFit('page'); e.currentTarget.blur(); });
 $('zoomWidth').addEventListener('click', (e) => { setFit('width'); e.currentTarget.blur(); });
 $('btnUndo').addEventListener('click', () => undo());
@@ -791,7 +804,7 @@ window.addEventListener('keydown', (e) => {
     case 'Enter':
       if (tag === 'BUTTON' && !inStage) return; // let header and panel buttons behave normally
       e.preventDefault();
-      toggleBreak(state.cur, { advance: true });
+      toggleStartHere();
       break;
     default: break;
   }
